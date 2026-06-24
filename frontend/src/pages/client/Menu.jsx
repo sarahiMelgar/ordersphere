@@ -1,39 +1,67 @@
+import { useEffect, useState } from "react";
+
 import HeaderCliente from "../../components/client/HeaderCliente";
-import HeroCliente from "../../components/client/HeaderCliente";
+import HeroCliente from "../../components/client/HeroCliente";
 import CategoriasCliente from "../../components/client/CategoriasCliente";
 import ProductoCard from "../../components/client/ProductoCard";
 import BottomNav from "../../components/client/BottomNav";
 
+import { obtenerProductos } from "../../firebase/productos";
+
 function Menu() {
 
-  const productos = [
+  const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    {
-      nombre: "Hamburguesa Doble",
-      precio: 180,
-      imagen:
-        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd"
-    },
+  useEffect(() => {
 
-    {
-      nombre: "Pizza Suprema",
-      precio: 220,
-      imagen:
-        "https://images.unsplash.com/photo-1513104890138-7c749659a591"
-    },
+    const cargarProductos = async () => {
 
-    {
-      nombre: "Tacos al Pastor",
-      precio: 140,
-      imagen:
-        "https://images.unsplash.com/photo-1552332386-f8dd00dc2f85"
-    }
+      try {
 
-  ];
+        const data = await obtenerProductos();
+
+        setProductos(data);
+
+      } catch (error) {
+
+        console.error(
+          "Error al obtener productos:",
+          error
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    };
+
+    cargarProductos();
+
+  }, []);
+
+  if (loading) {
+
+    return (
+
+      <div className="min-h-screen flex items-center justify-center">
+
+        <p className="text-xl font-semibold">
+          Cargando productos...
+        </p>
+
+      </div>
+
+    );
+
+  }
 
   return (
 
-<div className="min-h-screen bg-linear-to-br from-slate-100 via-orange-50 to-red-50 pb-28">
+    <div className="min-h-screen bg-linear-to-br from-slate-100 via-orange-50 to-red-50 pb-28">
+
       <HeaderCliente />
 
       <div className="p-8 space-y-8">
@@ -58,16 +86,30 @@ function Menu() {
 
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
 
-            {productos.map((producto, index) => (
+            {productos.length > 0 ? (
 
-              <ProductoCard
-                key={index}
-                nombre={producto.nombre}
-                precio={producto.precio}
-                imagen={producto.imagen}
-              />
+              productos.map((producto) => (
 
-            ))}
+                <ProductoCard
+                  key={producto.id}
+                  nombre={producto.nombre}
+                  precio={producto.precio}
+                  imagen={producto.imagen}
+                />
+
+              ))
+
+            ) : (
+
+              <div className="col-span-full text-center">
+
+                <p className="text-slate-500">
+                  No hay productos registrados.
+                </p>
+
+              </div>
+
+            )}
 
           </div>
 
