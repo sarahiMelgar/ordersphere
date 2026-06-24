@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Menu from "./pages/Menu";
+
 import Login from "./pages/login";
 import Register from "./pages/Register";
+
 import Dashboard from "./pages/Dashboard";
 import Categorias from "./pages/Categorias";
 import Productos from "./pages/Productos";
@@ -9,12 +10,12 @@ import Pedidos from "./pages/Pedidos";
 import Clientes from "./pages/Clientes";
 import Promociones from "./pages/Promociones";
 import Settings from "./pages/Settings";
-import PedidosCliente from "./pages/PedidosCliente";
-import Inicio from "./pages/Inicio";
-import Carrito from "./pages/Carrito";
-import Perfil from "./pages/Perfil";
 
-
+import Inicio from "./pages/client/Inicio";
+import Menu from "./pages/client/Menu";
+import Carrito from "./pages/client/Carrito";
+import PedidosCliente from "./pages/client/PedidosCliente";
+import Perfil from "./pages/client/Perfil";
 
 
 function App() {

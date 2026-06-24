@@ -1,8 +1,8 @@
-import HeaderCliente from "../components/client/HeaderCliente";
-import HeroCliente from "../components/client/HeroCliente";
-import CategoriasCliente from "../components/client/CategoriasCliente";
-import ProductoCard from "../components/client/ProductoCard";
-import BottomNav from "../components/client/BottomNav";
+import HeaderCliente from "../../components/client/HeaderCliente";
+import HeroCliente from "../../components/client/HeaderCliente";
+import CategoriasCliente from "../../components/client/CategoriasCliente";
+import ProductoCard from "../../components/client/ProductoCard";
+import BottomNav from "../../components/client/BottomNav";
 
 function Menu() {
 

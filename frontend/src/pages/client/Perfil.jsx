@@ -1,4 +1,4 @@
-import BottomNav from "../components/client/BottomNav";
+import BottomNav from "../../components/client/BottomNav";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 

@@ -1,6 +1,6 @@
-import BottomNav from "../components/client/BottomNav";
+import BottomNav from "../../components/client/BottomNav";
 
-function CarritoCliente() {
+function Carrito() {
 
   const productos = [
     {
@@ -311,4 +311,4 @@ function CarritoCliente() {
 }
 
 
-export default CarritoCliente;
+export default Carrito;

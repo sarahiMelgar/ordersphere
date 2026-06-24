@@ -1,4 +1,4 @@
-import BottomNav from "../components/client/BottomNav";
+import BottomNav from "../../components/client/BottomNav";
 
 function InicioCliente() {
   return (
