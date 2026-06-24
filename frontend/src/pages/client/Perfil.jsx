@@ -1,5 +1,5 @@
+import { useState } from "react";
 import BottomNav from "../../components/client/BottomNav";
-import HeaderCliente from "../../components/client/HeaderCliente";
 import { 
   LogOut, 
   User, 
@@ -8,7 +8,14 @@ import {
   CircleDot,
   UserCircle,
   Activity,
-  BadgeCheck
+  BadgeCheck,
+  Menu,
+  X,
+  ShoppingCart,
+  Home,
+  UtensilsCrossed,
+  Clock,
+  ChevronRight
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -19,6 +26,7 @@ function Perfil() {
   // ==========================
 
   const navigate = useNavigate();
+  const [menuAbierto, setMenuAbierto] = useState(false);
 
   // ==========================
   // DATOS DEL USUARIO
@@ -59,7 +67,64 @@ function Perfil() {
 
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 pb-28">
 
-    <HeaderCliente />
+    {/* NAVBAR */}
+    <nav className="relative z-50 flex items-center justify-between px-6 py-4 border-b border-slate-200 backdrop-blur-md bg-white/70 sticky top-0">
+      <div className="flex items-center gap-2 text-xl font-black text-slate-900 tracking-tight">
+        🍔 Order<span className="text-orange-500">Sphere</span>
+      </div>
+      <div className="hidden md:flex items-center gap-8">
+        {[
+          { label: "Inicio", path: "/inicio", icon: <Home size={14} /> },
+          { label: "Menú", path: "/menu", icon: <UtensilsCrossed size={14} /> },
+          { label: "Mis Pedidos", path: "/pedidoscliente", icon: <Clock size={14} /> },
+          { label: "Carrito", path: "/carrito", icon: <ShoppingCart size={14} /> },
+          { label: "Perfil", path: "/perfil", icon: <User size={14} /> },
+        ].map(({ label, path, icon }) => (
+          <span
+            key={label}
+            onClick={() => navigate(path)}
+            className="flex items-center gap-1.5 text-slate-500 text-sm font-medium cursor-pointer hover:text-orange-500 transition-colors duration-200"
+          >
+            {icon} {label}
+          </span>
+        ))}
+      </div>
+      <button
+        onClick={() => setMenuAbierto(!menuAbierto)}
+        className="md:hidden w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700"
+      >
+        {menuAbierto ? <X size={20} /> : <Menu size={20} />}
+      </button>
+    </nav>
+
+    {/* MENÚ MOBILE */}
+    {menuAbierto && (
+      <div className="md:hidden fixed inset-0 z-40 bg-gradient-to-br from-slate-50 to-slate-100 backdrop-blur-xl flex flex-col pt-24 px-8">
+        <div className="flex flex-col gap-2">
+          {[
+            { icon: <Home size={20} />, label: "Inicio", path: "/inicio" },
+            { icon: <UtensilsCrossed size={20} />, label: "Menú", path: "/menu" },
+            { icon: <Clock size={20} />, label: "Mis Pedidos", path: "/pedidoscliente" },
+            { icon: <ShoppingCart size={20} />, label: "Carrito", path: "/carrito" },
+            { icon: <User size={20} />, label: "Mi Perfil", path: "/perfil" },
+          ].map(({ icon, label, path }) => (
+            <button
+              key={label}
+              onClick={() => { navigate(path); setMenuAbierto(false); }}
+              className="flex items-center gap-4 px-5 py-4 rounded-2xl text-slate-700 hover:bg-white/60 hover:text-orange-500 transition-all text-left text-lg font-semibold"
+            >
+              <span className="text-orange-500">{icon}</span>
+              {label}
+              <ChevronRight size={16} className="ml-auto text-slate-400" />
+            </button>
+          ))}
+        </div>
+        <div className="mt-auto mb-12 p-5 rounded-2xl bg-white/70 border border-orange-200">
+          <p className="text-slate-900 font-black text-lg">👋 Hola, {nombre}</p>
+          <p className="text-slate-500 text-sm mt-1">{correo}</p>
+        </div>
+      </div>
+    )}
 
     <div className="p-6">
       {/* ==========================
@@ -240,4 +305,4 @@ function Perfil() {
   );
 }
 
-export default Perfil; 
+export default Perfil;

@@ -50,7 +50,7 @@ const handleLogin = async () => {
 
     } else {
 
-      navigate("/menu");
+      navigate("/inicio");
 
     }
 
