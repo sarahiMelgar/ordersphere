@@ -1,5 +1,16 @@
-jsx
-import { useState } from "react";
+// =====================================
+// REACT
+// =====================================
+
+import {
+  useState,
+  useEffect
+} from "react";
+
+// =====================================
+// ROUTER
+// =====================================
+
 import { useNavigate } from "react-router-dom";
 
 // =====================================
@@ -17,14 +28,55 @@ import {
 // =====================================
 
 import { logoutUser } from "../firebase/auth";
+import { auth } from "../firebase/firebaseConfig";
 
-export default function Header() {
+// =====================================
+// COMPONENTE HEADER
+// =====================================
+
+function Header() {
+
+  // =====================================
+  // NAVEGACIÓN
+  // =====================================
 
   const navigate = useNavigate();
+
+  // =====================================
+  // ESTADOS
+  // =====================================
 
   const [mostrarPerfil, setMostrarPerfil] =
     useState(false);
 
+  const [usuario, setUsuario] =
+    useState(null);
+
+  // =====================================
+  // OBTENER USUARIO ACTUAL
+  // =====================================
+
+  useEffect(() => {
+
+    const user =
+      auth.currentUser;
+
+    if (user) {
+
+      setUsuario(user);
+
+      console.log(
+        "Usuario:",
+        user.email
+      );
+
+    }
+
+  }, []);
+
+  // =====================================
+  // CERRAR SESIÓN
+  // =====================================
 
   const cerrarSesion = async () => {
 
@@ -42,6 +94,9 @@ export default function Header() {
 
   };
 
+  // =====================================
+  // RENDER
+  // =====================================
 
   return (
 
@@ -61,6 +116,10 @@ export default function Header() {
       "
     >
 
+      {/* =====================================
+          BOTÓN NOTIFICACIONES
+      ===================================== */}
+
       <button
         className="
           w-14
@@ -77,6 +136,9 @@ export default function Header() {
         <Bell size={22} />
       </button>
 
+      {/* =====================================
+          BOTÓN MODO OSCURO
+      ===================================== */}
 
       <button
         className="
@@ -94,7 +156,9 @@ export default function Header() {
         <Moon size={22} />
       </button>
 
-
+      {/* =====================================
+          PERFIL
+      ===================================== */}
 
       <div className="relative">
 
@@ -128,11 +192,21 @@ export default function Header() {
             <User size={26} />
           </div>
 
+          {/* Datos Usuario */}
 
           <div>
 
-            <h3 className="text-xl font-bold">
-              Administrador
+            <h3
+              className="
+                text-xl
+                font-bold
+              "
+            >
+              {
+                usuario?.email
+                  ?.split("@")[0] ||
+                "Administrador"
+              }
             </h3>
 
             <p
@@ -148,7 +222,9 @@ export default function Header() {
 
         </button>
 
-
+        {/* =====================================
+            MENÚ DESPLEGABLE
+        ===================================== */}
 
         {mostrarPerfil && (
 
@@ -196,12 +272,29 @@ export default function Header() {
 
               <div>
 
-                <h3 className="font-bold text-lg">
-                  Administrador
+                <h3
+                  className="
+                    font-bold
+                    text-lg
+                  "
+                >
+                  {
+                    usuario?.email
+                      ?.split("@")[0] ||
+                    "Administrador"
+                  }
                 </h3>
 
-                <p className="text-slate-500 text-sm">
-                  admin@ordersphere.com
+                <p
+                  className="
+                    text-slate-500
+                    text-sm
+                  "
+                >
+                  {
+                    usuario?.email ||
+                    "Sin correo"
+                  }
                 </p>
 
               </div>
@@ -247,7 +340,7 @@ export default function Header() {
               ⚙️ Configuración
             </button>
 
-
+            {/* Cerrar Sesión */}
 
             <button
               onClick={cerrarSesion}
@@ -275,3 +368,4 @@ export default function Header() {
   );
 
 }
+export default Header;
