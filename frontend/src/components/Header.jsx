@@ -1,90 +1,307 @@
-import { Bell, Moon, Sun, User } from "lucide-react";
-import { useTheme } from "../context/ThemeContext";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-function Header() {
+import {
+  Bell,
+  Moon,
+  User
+} from "lucide-react";
 
-  const { darkMode, setDarkMode } = useTheme();
+import { logoutUser } from "../firebase/auth";
+
+export default Header;
+
+  // ==========================
+  // NAVEGACIÓN
+  // ==========================
+
+  const navigate = useNavigate();
+
+  // ==========================
+  // ESTADOS
+  // ==========================
+
+  const [mostrarPerfil, setMostrarPerfil] =
+    useState(false);
+
+  // ==========================
+  // CERRAR SESIÓN
+  // ==========================
+
+  const cerrarSesion = async () => {
+
+    try {
+
+      await logoutUser();
+
+      navigate("/");
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  };
 
   return (
-    <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-8 py-4">
 
-      <div className="flex items-center justify-end"> {/* Cambiamos a justify-end para alinear a la derecha */}
+    <header
+      className="
+        bg-white
+        shadow-sm
+        border-b
+        border-slate-200
+        px-8
+        py-4
+        flex
+        justify-end
+        items-center
+        gap-5
+        relative
+      "
+    >
 
-        {/* Acciones */}
-        <div className="flex items-center gap-4">
+      {/* ==========================
+          NOTIFICACIONES
+      ========================== */}
 
-          <button
+      <button
+        className="
+          w-14
+          h-14
+          rounded-2xl
+          bg-slate-100
+          flex
+          items-center
+          justify-center
+          hover:bg-slate-200
+          transition-all
+        "
+      >
+        <Bell size={22} />
+      </button>
+
+      {/* ==========================
+          MODO OSCURO
+      ========================== */}
+
+      <button
+        className="
+          w-14
+          h-14
+          rounded-2xl
+          bg-slate-100
+          flex
+          items-center
+          justify-center
+          hover:bg-slate-200
+          transition-all
+        "
+      >
+        <Moon size={22} />
+      </button>
+
+      {/* ==========================
+          PERFIL ADMINISTRADOR
+      ========================== */}
+
+      <div className="relative">
+
+        <button
+          onClick={() =>
+            setMostrarPerfil(
+              !mostrarPerfil
+            )
+          }
+          className="
+            flex
+            items-center
+            gap-4
+          "
+        >
+
+          {/* Avatar */}
+
+          <div
             className="
-              w-12
-              h-12
-              rounded-2xl
-              bg-slate-100
-              dark:bg-slate-800
-              dark:text-white
-              hover:bg-orange-100
+              w-16
+              h-16
+              rounded-full
+              bg-orange-500
               flex
               items-center
               justify-center
-              transition
+              text-white
             "
           >
-            <Bell size={20} />
-          </button>
+            <User size={26} />
+          </div>
 
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="
-              w-12
-              h-12
-              rounded-2xl
-              bg-slate-100
-              dark:bg-slate-800
-              dark:text-white
-              hover:bg-orange-100
-              flex
-              items-center
-              justify-center
-              transition
-            "
-          >
-            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
+          {/* Información */}
 
-          <div className="flex items-center gap-3">
+          <div>
 
-            <div
+            <h3
               className="
-                w-12
-                h-12
-                rounded-full
-                bg-orange-500
-                flex
-                items-center
-                justify-center
-                text-white
+                text-xl
+                font-bold
               "
             >
-              <User size={20} />
-            </div>
+              Administrador
+            </h3>
 
-            <div>
-              <p className="font-semibold dark:text-white">
-                Administrador
-              </p>
-
-              <p className="text-sm text-green-500">
-                ● Online
-              </p>
-            </div>
+            <p
+              className="
+                text-green-500
+                text-sm
+              "
+            >
+              ● Online
+            </p>
 
           </div>
 
-        </div>
+        </button>
+
+        {/* ==========================
+            MENÚ DESPLEGABLE
+        ========================== */}
+
+        {mostrarPerfil && (
+
+          <div
+            className="
+              absolute
+              right-0
+              top-20
+              w-80
+              bg-white
+              rounded-3xl
+              shadow-xl
+              border
+              border-slate-200
+              p-5
+              z-50
+            "
+          >
+
+            {/* Cabecera */}
+
+            <div
+              className="
+                flex
+                items-center
+                gap-4
+                mb-4
+              "
+            >
+
+              <div
+                className="
+                  w-14
+                  h-14
+                  rounded-full
+                  bg-orange-500
+                  flex
+                  items-center
+                  justify-center
+                  text-white
+                "
+              >
+                <User size={24} />
+              </div>
+
+              <div>
+
+                <h3
+                  className="
+                    font-bold
+                    text-lg
+                  "
+                >
+                  Administrador
+                </h3>
+
+                <p
+                  className="
+                    text-slate-500
+                    text-sm
+                  "
+                >
+                  admin@ordersphere.com
+                </p>
+
+              </div>
+
+            </div>
+
+            <hr />
+
+            {/* Mi Perfil */}
+
+            <button
+              onClick={() =>
+                navigate("/perfil")
+              }
+              className="
+                w-full
+                text-left
+                mt-4
+                p-3
+                rounded-xl
+                hover:bg-slate-100
+                transition-all
+              "
+            >
+              👤 Mi Perfil
+            </button>
+
+            {/* Configuración */}
+
+            <button
+              onClick={() =>
+                navigate("/settings")
+              }
+              className="
+                w-full
+                text-left
+                p-3
+                rounded-xl
+                hover:bg-slate-100
+                transition-all
+              "
+            >
+              ⚙️ Configuración
+            </button>
+
+            {/* Cerrar sesión */}
+
+            <button
+              onClick={cerrarSesion}
+              className="
+                w-full
+                text-left
+                p-3
+                rounded-xl
+                text-red-500
+                hover:bg-red-50
+                transition-all
+              "
+            >
+              🚪 Cerrar Sesión
+            </button>
+
+          </div>
+
+        )}
 
       </div>
 
     </header>
+
   );
+
 }
 
 export default Header;
