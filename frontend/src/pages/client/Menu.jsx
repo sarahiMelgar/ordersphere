@@ -120,12 +120,13 @@ function Menu() {
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
             {productos.length > 0 ? (
               productos.map((producto) => (
-                <ProductoCard
-                  key={producto.id}
-                  nombre={producto.nombre}
-                  precio={producto.precio}
-                  imagen={producto.imagen}
-                />
+             <ProductoCard
+  key={producto.id}
+  id={producto.id}
+  nombre={producto.nombre}
+  precio={producto.precio}
+  imagen={producto.imagen}
+/>
               ))
             ) : (
               <div className="col-span-full text-center py-10">

@@ -1,45 +1,61 @@
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { useState } from "react";
+import { agregarAlCarrito } from "../../firebase/AgregarCarrito";
+import { auth } from "../../firebase/firebaseConfig";
 
 function ProductoCard({
+  id,
   nombre,
   precio,
   imagen
 }) {
 
   const [cantidad, setCantidad] = useState(1);
+  const [loading, setLoading] = useState(false);
 
-  const agregarAlCarrito = () => {
+  const handleAgregarAlCarrito = async () => {
 
-    const carritoActual =
-      JSON.parse(
-        localStorage.getItem("carrito")
-      ) || [];
+    if (!auth.currentUser) {
+      alert("Debes iniciar sesión");
+      return;
+    }
 
-    carritoActual.push({
-      id: Date.now(),
-      nombre,
-      precio,
-      imagen,
-      cantidad
-    });
+    try {
 
-    localStorage.setItem(
-      "carrito",
-      JSON.stringify(carritoActual)
-    );
+      setLoading(true);
 
-    window.dispatchEvent(
-      new Event("carritoActualizado")
-    );
+      await agregarAlCarrito({
+        idCliente: auth.currentUser.uid,
+        idItem: id,
+        tipo: "producto",
+        cantidad
+      });
 
-    alert(
-      `${cantidad} ${nombre} agregado(s) al carrito 🛒`
-    );
+      alert(
+        `${cantidad} ${nombre} agregado(s) al carrito 🛒`
+      );
 
-    setCantidad(1);
+      setCantidad(1);
+
+      window.dispatchEvent(
+        new Event("carritoActualizado")
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "Error al agregar al carrito"
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
   };
-
 
   return (
 
@@ -70,19 +86,15 @@ function ProductoCard({
         "
       />
 
-
       <div className="p-5">
-
 
         <h3 className="font-bold text-slate-900 text-base">
           {nombre}
         </h3>
 
-
         <p className="text-slate-500 text-sm mt-1">
           Delicioso producto preparado al momento.
         </p>
-
 
         <div className="flex justify-between items-center mt-4">
 
@@ -92,9 +104,7 @@ function ProductoCard({
 
         </div>
 
-
         <div className="flex items-center justify-center gap-3 mt-4">
-
 
           <button
             onClick={() =>
@@ -112,26 +122,26 @@ function ProductoCard({
               border
               border-slate-200
               text-slate-600
-              font-bold
               flex
               items-center
               justify-center
+              hover:bg-slate-200
+              transition
             "
           >
             <Minus size={14}/>
           </button>
 
-
           <span
             className="
               font-bold
-              w-6
+              text-lg
+              w-8
               text-center
             "
           >
             {cantidad}
           </span>
-
 
           <button
             onClick={() =>
@@ -143,44 +153,56 @@ function ProductoCard({
               rounded-xl
               bg-orange-500
               text-white
-              font-bold
               flex
               items-center
               justify-center
+              hover:bg-orange-400
+              transition
             "
           >
             <Plus size={14}/>
           </button>
 
-
         </div>
 
-
         <button
-          onClick={agregarAlCarrito}
-          className="
+          onClick={handleAgregarAlCarrito}
+         
+          disabled={loading}
+          className={`
             w-full
             mt-4
-            bg-orange-500
-            hover:bg-orange-400
-            text-white
-            py-2.5
+            py-3
             rounded-xl
             font-bold
-          "
+            flex
+            items-center
+            justify-center
+            gap-2
+            transition-all
+            ${
+              loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-orange-500 hover:bg-orange-400 text-white"
+            }
+          `}
         >
-          Agregar al carrito
+          <ShoppingCart size={18} />
+
+          {
+            loading
+            ? "Agregando..."
+            : "Agregar Producto"
+          }
+
         </button>
 
-
       </div>
-
 
     </div>
 
   );
 
 }
-
 
 export default ProductoCard;
