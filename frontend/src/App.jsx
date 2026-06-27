@@ -18,6 +18,7 @@ import Menu from "./pages/client/Menu";
 import Carrito from "./pages/client/Carrito";
 import PedidosCliente from "./pages/client/PedidosCliente";
 import Perfil from "./pages/client/Perfil";
+import ChatBot from "./pages/client/ChatBot";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <Route path="/carrito" element={<Carrito />} />
         <Route path="/pedidoscliente" element={<PedidosCliente />} />
         <Route path="/perfil" element={<Perfil />} />
+        <Route path="/chat" element={<ChatBot />} />
       </Routes>
     </BrowserRouter>
   );

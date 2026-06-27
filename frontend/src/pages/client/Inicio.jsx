@@ -119,14 +119,23 @@ function Inicio() {
             ¿Qué se te antoja pedir hoy?
           </p>
 
-          <button
-            onClick={() => navigate("/menu")}
-            className="mt-6 flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white px-7 py-3 rounded-2xl font-bold"
-          >
-            <UtensilsCrossed size={18} />
-            Ver Menú
-            <ArrowRight size={16} />
-          </button>
+          <div className="mt-6 flex items-center gap-3 flex-wrap">
+  <button
+    onClick={() => navigate("/menu")}
+    className="flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white px-7 py-3 rounded-2xl font-bold transition-all"
+  >
+    <UtensilsCrossed size={18} />
+    Ver Menú
+    <ArrowRight size={16} />
+  </button>
+
+  <button
+    onClick={() => navigate("/chat")}
+    className="flex items-center gap-2 bg-white border border-orange-200 text-orange-500 hover:bg-orange-50 px-7 py-3 rounded-2xl font-bold transition-all"
+  >
+    🤖 Ayúdame a elegir
+  </button>
+</div>
 
         </div>
 

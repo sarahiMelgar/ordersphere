@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   collection,
   query,
   where,
   getDocs,
+  addDoc,
+  updateDoc,
   doc,
   getDoc,
-  updateDoc,
   serverTimestamp
 } from "firebase/firestore";
 import { db, auth } from "../../firebase/firebaseConfig";
@@ -15,13 +17,21 @@ import {
   Trash2,
   ArrowRight,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Home,
+  UtensilsCrossed,
+  Clock,
+  User,
+  Menu as MenuIcon,
+  X,
+  ChevronRight
 } from "lucide-react";
 import BottomNav from "../../components/client/BottomNav";
 import ModalPago from "../../components/client/ModalPago";
-import HeaderCliente from "../../components/client/HeaderCliente";
+
 function Carrito() {
-      <HeaderCliente />
+  const navigate = useNavigate();
+  const [menuAbierto, setMenuAbierto] = useState(false);
   const [carrito, setCarrito] = useState(null);
   const [productos, setProductos] = useState([]);
   const [modalPagoAbierto, setModalPagoAbierto] = useState(false);
@@ -78,9 +88,7 @@ function Carrito() {
           try {
             const ref = doc(db, "productos", item.id_item);
             const snap = await getDoc(ref);
-
             if (!snap.exists()) return null;
-
             return {
               id: item.id_item,
               cantidad: item.cantidad,
@@ -113,15 +121,10 @@ function Carrito() {
         tipo: "producto"
       }));
 
-      await updateDoc(doc(db, "carritos", carrito.id), {
-        items: nuevoItems
-      });
+      await updateDoc(doc(db, "carritos", carrito.id), { items: nuevoItems });
 
-      // Si no quedan productos, actualizar el estado del carrito
       if (nuevosProductos.length === 0) {
-        await updateDoc(doc(db, "carritos", carrito.id), {
-          estado: "vacio"
-        });
+        await updateDoc(doc(db, "carritos", carrito.id), { estado: "vacio" });
         setCarrito(null);
       }
     } catch (err) {
@@ -132,7 +135,6 @@ function Carrito() {
 
   const actualizarCantidad = async (id, nuevaCantidad) => {
     if (nuevaCantidad < 1) return;
-
     try {
       const productosActualizados = productos.map((p) =>
         p.id === id ? { ...p, cantidad: nuevaCantidad } : p
@@ -145,35 +147,92 @@ function Carrito() {
         tipo: "producto"
       }));
 
-      await updateDoc(doc(db, "carritos", carrito.id), {
-        items: nuevoItems
-      });
+      await updateDoc(doc(db, "carritos", carrito.id), { items: nuevoItems });
     } catch (err) {
       console.error("Error actualizando cantidad:", err);
       alert("Error al actualizar la cantidad. Por favor, intenta de nuevo.");
     }
   };
 
-  const subtotal = productos.reduce(
-    (t, p) => t + p.precio * p.cantidad,
-    0
-  );
-
+  const subtotal = productos.reduce((t, p) => t + p.precio * p.cantidad, 0);
   const envio = productos.length > 0 ? 30 : 0;
   const total = subtotal + envio;
 
   const handlePagoCompletado = (pedidoId) => {
     setPedidoCompletado(pedidoId);
     setModalPagoAbierto(false);
-    // Resetear carrito
     setCarrito(null);
     setProductos([]);
   };
 
-  // Estado de carga
+  // ========================
+  // NAVBAR compartido
+  // ========================
+  const Navbar = () => (
+    <>
+      <nav className="relative z-50 flex items-center justify-between px-6 py-4 border-b border-slate-200 backdrop-blur-md bg-white/70 sticky top-0">
+        <div className="flex items-center gap-2 text-xl font-black text-slate-900 tracking-tight">
+          🍔 Order<span className="text-orange-500">Sphere</span>
+        </div>
+        <div className="hidden md:flex items-center gap-8">
+          {[
+            { label: "Inicio", path: "/inicio", icon: <Home size={14} /> },
+            { label: "Menú", path: "/menu", icon: <UtensilsCrossed size={14} /> },
+            { label: "Mis Pedidos", path: "/pedidoscliente", icon: <Clock size={14} /> },
+            { label: "Carrito", path: "/carrito", icon: <ShoppingCart size={14} /> },
+            { label: "Perfil", path: "/perfil", icon: <User size={14} /> },
+          ].map(({ label, path, icon }) => (
+            <span
+              key={label}
+              onClick={() => navigate(path)}
+              className="flex items-center gap-1.5 text-slate-500 text-sm font-medium cursor-pointer hover:text-orange-500 transition-colors duration-200"
+            >
+              {icon} {label}
+            </span>
+          ))}
+        </div>
+        <button
+          onClick={() => setMenuAbierto(!menuAbierto)}
+          className="md:hidden w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700"
+        >
+          {menuAbierto ? <X size={20} /> : <MenuIcon size={20} />}
+        </button>
+      </nav>
+
+      {menuAbierto && (
+        <div className="md:hidden fixed inset-0 z-40 bg-gradient-to-br from-slate-100 via-orange-50 to-red-50 backdrop-blur-xl flex flex-col pt-24 px-8">
+          <div className="flex flex-col gap-2">
+            {[
+              { icon: <Home size={20} />, label: "Inicio", path: "/inicio" },
+              { icon: <UtensilsCrossed size={20} />, label: "Menú", path: "/menu" },
+              { icon: <Clock size={20} />, label: "Mis Pedidos", path: "/pedidoscliente" },
+              { icon: <ShoppingCart size={20} />, label: "Carrito", path: "/carrito" },
+              { icon: <User size={20} />, label: "Mi Perfil", path: "/perfil" },
+            ].map(({ icon, label, path }) => (
+              <button
+                key={label}
+                onClick={() => { navigate(path); setMenuAbierto(false); }}
+                className="flex items-center gap-4 px-5 py-4 rounded-2xl text-slate-700 hover:bg-white/60 hover:text-orange-500 transition-all text-left text-lg font-semibold"
+              >
+                <span className="text-orange-500">{icon}</span>
+                {label}
+                <ChevronRight size={16} className="ml-auto text-slate-400" />
+              </button>
+            ))}
+          </div>
+          <div className="mt-auto mb-12 p-5 rounded-2xl bg-white/70 border border-orange-200">
+            <p className="text-slate-900 font-black text-lg">👋 Hola, Cliente</p>
+            <p className="text-slate-500 text-sm mt-1">{auth.currentUser?.email || ""}</p>
+          </div>
+        </div>
+      )}
+    </>
+  );
+
   if (cargando) {
     return (
-      <div className="min-h-screen bg-slate-100 pb-28">
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-red-50 pb-28">
+        <Navbar />
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
         </div>
@@ -182,10 +241,10 @@ function Carrito() {
     );
   }
 
-  // Estado de error
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-100 pb-28">
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-red-50 pb-28">
+        <Navbar />
         <div className="p-6">
           <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
@@ -203,10 +262,10 @@ function Carrito() {
     );
   }
 
-  // Carrito vacío
   if (!carrito || productos.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-100 pb-28">
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-red-50 pb-28">
+        <Navbar />
         <div className="p-6">
           <div className="bg-white rounded-2xl p-12 text-center shadow-sm">
             <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -219,7 +278,7 @@ function Carrito() {
               ¡Explora nuestros productos y encuentra lo que necesitas!
             </p>
             <button
-              onClick={() => window.location.href = "/menu"}
+              onClick={() => navigate("/menu")}
               className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl font-bold transition-colors"
             >
               Ver productos
@@ -232,7 +291,10 @@ function Carrito() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 pb-28">
+    <div className="min-h-screen bg-linear-to-br from-slate-100 via-orange-50 to-red-50 pb-28">
+
+      <Navbar />
+
       {/* HEADER */}
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="p-6">
@@ -249,52 +311,38 @@ function Carrito() {
       {/* PRODUCTOS */}
       <div className="p-4 space-y-3">
         {productos.map((p) => (
-          <div
-            key={p.id}
-            className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-          >
+          <div key={p.id} className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
             <div className="flex gap-4">
               <img
                 src={p.imagen || "/placeholder-image.jpg"}
                 alt={p.nombre}
                 className="w-20 h-20 rounded-lg object-cover"
-                onError={(e) => {
-                  e.target.src = "/placeholder-image.jpg";
-                }}
+                onError={(e) => { e.target.src = "/placeholder-image.jpg"; }}
               />
-
               <div className="flex-1">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-bold text-gray-800">{p.nombre}</h3>
-                    <p className="text-orange-500 font-semibold">
-                      ${p.precio.toFixed(2)}
-                    </p>
+                    <p className="text-orange-500 font-semibold">${p.precio.toFixed(2)}</p>
                   </div>
                   <button
                     onClick={() => eliminarProducto(p.id)}
                     className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
-                    aria-label="Eliminar producto"
                   >
                     <Trash2 className="w-5 h-5 text-gray-400 group-hover:text-red-500 transition-colors" />
                   </button>
                 </div>
-
                 <div className="flex items-center gap-3 mt-2">
                   <button
                     onClick={() => actualizarCantidad(p.id, p.cantidad - 1)}
                     className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center font-bold transition-colors"
-                    aria-label="Disminuir cantidad"
                   >
                     -
                   </button>
-                  <span className="font-semibold w-8 text-center">
-                    {p.cantidad}
-                  </span>
+                  <span className="font-semibold w-8 text-center">{p.cantidad}</span>
                   <button
                     onClick={() => actualizarCantidad(p.id, p.cantidad + 1)}
                     className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center font-bold transition-colors"
-                    aria-label="Aumentar cantidad"
                   >
                     +
                   </button>
@@ -312,7 +360,6 @@ function Carrito() {
       <div className="p-4">
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="font-bold text-lg mb-4">Resumen de compra</h2>
-
           <div className="space-y-2">
             <div className="flex justify-between text-gray-600">
               <span>Subtotal ({productos.length} productos)</span>
@@ -329,7 +376,6 @@ function Carrito() {
               </div>
             </div>
           </div>
-
           <button
             onClick={() => setModalPagoAbierto(true)}
             className="w-full mt-6 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 group"
@@ -337,14 +383,12 @@ function Carrito() {
             <span>Proceder al pago</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
-
           <p className="text-xs text-gray-400 text-center mt-3">
             🔒 Transacción segura. Tus datos están protegidos.
           </p>
         </div>
       </div>
 
-      {/* MODAL DE PAGO */}
       {modalPagoAbierto && (
         <ModalPago
           total={total}
@@ -355,7 +399,6 @@ function Carrito() {
         />
       )}
 
-      {/* PEDIDO COMPLETADO */}
       {pedidoCompletado && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center">
@@ -364,9 +407,7 @@ function Carrito() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              ¡Pedido completado!
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">¡Pedido completado!</h2>
             <p className="text-gray-500 mb-2">
               Tu pedido #{pedidoCompletado} ha sido procesado exitosamente.
             </p>
@@ -374,10 +415,7 @@ function Carrito() {
               Recibirás un correo con los detalles de tu compra.
             </p>
             <button
-              onClick={() => {
-                setPedidoCompletado(null);
-                window.location.href = "/menu";
-              }}
+              onClick={() => { setPedidoCompletado(null); navigate("/menu"); }}
               className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl font-bold transition-colors"
             >
               Continuar comprando
