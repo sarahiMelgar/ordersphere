@@ -170,7 +170,7 @@ function Carrito() {
   // ========================
   const Navbar = () => (
     <>
-      <nav className="relative z-50 flex items-center justify-between px-6 py-4 border-b border-slate-200 backdrop-blur-md bg-white/70 sticky top-0">
+      <nav className="relative z-50 flex items-center justify-between px-6 py-4 border-b border-slate-200 backdrop-blur-md bg-white/70 top-0">
         <div className="flex items-center gap-2 text-xl font-black text-slate-900 tracking-tight">
           🍔 Order<span className="text-orange-500">Sphere</span>
         </div>
@@ -200,7 +200,7 @@ function Carrito() {
       </nav>
 
       {menuAbierto && (
-        <div className="md:hidden fixed inset-0 z-40 bg-gradient-to-br from-slate-100 via-orange-50 to-red-50 backdrop-blur-xl flex flex-col pt-24 px-8">
+        <div className="md:hidden fixed inset-0 z-40 bg-linear-to-br from-slate-100 via-orange-50 to-red-50 backdrop-blur-xl flex flex-col pt-24 px-8">
           <div className="flex flex-col gap-2">
             {[
               { icon: <Home size={20} />, label: "Inicio", path: "/inicio" },
@@ -231,7 +231,7 @@ function Carrito() {
 
   if (cargando) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-red-50 pb-28">
+      <div className="min-h-screen bg-linear-to-br from-slate-100 via-orange-50 to-red-50 pb-28">
         <Navbar />
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
@@ -243,7 +243,7 @@ function Carrito() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-red-50 pb-28">
+      <div className="min-h-screen bg-linear-to-br from-slate-100 via-orange-50 to-red-50 pb-28">
         <Navbar />
         <div className="p-6">
           <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
@@ -264,7 +264,7 @@ function Carrito() {
 
   if (!carrito || productos.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-red-50 pb-28">
+      <div className="min-h-screen bg-linear-to-br from-slate-100 via-orange-50 to-red-50 pb-28">
         <Navbar />
         <div className="p-6">
           <div className="bg-white rounded-2xl p-12 text-center shadow-sm">

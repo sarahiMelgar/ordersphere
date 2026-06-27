@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, ShoppingCart, RotateCcw, Mic } from "lucide-react";
+import { ArrowLeft, Send, ShoppingCart, RotateCcw } from "lucide-react";
 import {
   collection,
   query,
