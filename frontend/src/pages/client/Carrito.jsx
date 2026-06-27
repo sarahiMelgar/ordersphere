@@ -5,11 +5,9 @@ import {
   query,
   where,
   getDocs,
-  addDoc,
   updateDoc,
   doc,
   getDoc,
-  serverTimestamp
 } from "firebase/firestore";
 import { db, auth } from "../../firebase/firebaseConfig";
 import {
