@@ -4,7 +4,7 @@ import {
   Menu, X, ShoppingCart, User, Home, UtensilsCrossed,
   Clock, ChevronRight, Search, Package, AlertCircle
 } from "lucide-react";
-import { db } from "../../firebase/firebaseConfig";
+import { db, auth } from "../../firebase/firebaseConfig";
 import {
   collection, query, where, onSnapshot, orderBy
 } from "firebase/firestore";
@@ -58,66 +58,63 @@ function PedidosCliente() {
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState(null);
   const [busqueda, setBusqueda]       = useState("");
+  const [usuario, setUsuario]         = useState(null);
 
-  // ── Leer usuario desde localStorage ──
-  const uid    = localStorage.getItem("uid")    || "";
-  const nombre = localStorage.getItem("nombre") || "Cliente";
-  const correo = localStorage.getItem("correo") || "";
-
-  /* ── Listener en tiempo real filtrado por uid ── */
-
-useEffect(() => {
-  // Verificar que exista una sesión activa
-  if (!uid) {
-    setError("No hay sesión activa. Inicia sesión nuevamente.");
-    setLoading(false);
-    return;
-  }
-
-  setLoading(true);
-
-  const pedidosRef = collection(db, "pedidos");
-
-  const q = query(
-    pedidosRef,
-    where("id_cliente", "==", uid),
-    orderBy("fechadecreacion", "desc")
-  );
-
-  const unsubscribe = onSnapshot(
-    
-    q,
-    (snapshot) => {
-      const pedidosObtenidos = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setPedidos(pedidosObtenidos);
-      setLoading(false);
-      setError(null);
-    },
-    (error) => {
-      console.error("Error al obtener pedidos:", error);
-
-      // Error común cuando falta el índice compuesto
-      if (error.code === "failed-precondition") {
-        setError(
-          "Firebase requiere crear un índice para esta consulta. Revisa la consola del navegador y abre el enlace que proporciona Firebase."
-        );
-      } else {
-        setError("No fue posible cargar los pedidos.");
+  /* ── Escuchar usuario autenticado ── */
+  useEffect(() => {
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      setUsuario(user);
+      if (!user) {
+        setError("No hay sesión activa. Inicia sesión nuevamente.");
+        setLoading(false);
       }
+    });
+    return () => unsubscribeAuth();
+  }, []);
 
-      setLoading(false);
-    }
-  );
+  /* ── Listener en tiempo real filtrado por uid real de Firebase ── */
+  useEffect(() => {
+    if (!usuario) return;
 
-  // Limpiar listener al salir del componente
-  return () => unsubscribe();
+    setLoading(true);
 
-}, [uid]);
+    const pedidosRef = collection(db, "pedidos");
 
+    const q = query(
+      pedidosRef,
+      where("id_cliente", "==", usuario.uid),
+      orderBy("fechadecreacion", "desc")
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const pedidosObtenidos = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setPedidos(pedidosObtenidos);
+        setLoading(false);
+        setError(null);
+      },
+      (error) => {
+        console.error("Error al obtener pedidos:", error);
+
+        if (error.code === "failed-precondition") {
+          setError(
+            "Firebase requiere crear un índice para esta consulta. Revisa la consola del navegador y abre el enlace que proporciona Firebase."
+          );
+        } else {
+          setError("No fue posible cargar los pedidos.");
+        }
+
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [usuario]);
 
   /* ── Contadores dinámicos ── */
   const total      = pedidos.length;
@@ -131,9 +128,9 @@ useEffect(() => {
     const texto = busqueda.toLowerCase();
     return (
       Array.isArray(p.productos) &&
-p.productos.some((prod) =>
-  prod.nombre?.toLowerCase().includes(texto)
-)
+      p.productos.some((prod) =>
+        prod.nombre?.toLowerCase().includes(texto)
+      )
     );
   });
 
@@ -149,7 +146,7 @@ p.productos.some((prod) =>
     <div className="min-h-screen bg-linear-to-br from-slate-100 via-orange-50 to-red-50 relative overflow-hidden pb-28">
 
       {/* ── NAVBAR ── */}
-      <nav className="relative z-50 flex items-center justify-between px-6 py-4 border-b border-slate-200 backdrop-blur-md bg-white/70 sticky top-0">
+      <nav className="relative z-50 flex items-center justify-between px-6 py-4 border-b border-slate-200 backdrop-blur-md bg-white/70 top-0">
         <div className="flex items-center gap-2 text-xl font-black text-slate-900 tracking-tight">
           🍔 Order<span className="text-orange-500">Sphere</span>
         </div>
@@ -195,8 +192,8 @@ p.productos.some((prod) =>
             ))}
           </div>
           <div className="mt-auto mb-12 p-5 rounded-2xl bg-white/70 border border-orange-200">
-            <p className="text-slate-900 font-black text-lg">👋 Hola, {nombre}</p>
-            <p className="text-slate-500 text-sm mt-1">{correo}</p>
+            <p className="text-slate-900 font-black text-lg">👋 Hola, {usuario?.displayName || "Cliente"}</p>
+            <p className="text-slate-500 text-sm mt-1">{usuario?.email || ""}</p>
           </div>
         </div>
       )}
@@ -204,14 +201,12 @@ p.productos.some((prod) =>
       {/* ── CONTENIDO ── */}
       <div className="relative z-10 p-6 md:p-8 space-y-8">
 
-        {/* Hero */}
         <div className="relative rounded-3xl p-8 border border-orange-200 bg-white/60 backdrop-blur-sm overflow-hidden">
           <p className="text-orange-500 text-sm font-bold tracking-widest uppercase mb-2">✦ Tu actividad</p>
           <h2 className="text-4xl font-black text-slate-900 tracking-tight">🛒 Mis Pedidos</h2>
           <p className="mt-2 text-slate-500 text-lg">Consulta el estado de tus pedidos y el historial de compras.</p>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-2xl p-5">
             <AlertCircle size={20} className="shrink-0" />
@@ -219,7 +214,6 @@ p.productos.some((prod) =>
           </div>
         )}
 
-        {/* Resumen */}
         {!error && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white/70 backdrop-blur-sm border border-slate-200 rounded-2xl p-6 shadow-sm">
@@ -237,7 +231,6 @@ p.productos.some((prod) =>
           </div>
         )}
 
-        {/* Historial */}
         {!error && (
           <div className="bg-white/70 backdrop-blur-sm border border-slate-200 rounded-2xl p-6 shadow-sm">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
@@ -290,13 +283,12 @@ p.productos.some((prod) =>
                           </h4>
                           <p className="text-slate-400 text-xs mt-0.5">{formatFecha(pedido.fechadecreacion)}</p>
                           <ul className="mt-3 space-y-0.5">
-                          {Array.isArray(pedido.productos) &&
-  pedido.productos.map((prod, i) => (
-    <li key={i} className="text-slate-700 text-sm">
-      🍽 {prod.nombre} x{prod.cantidad}
-    </li>
-  ))
-}
+                            {Array.isArray(pedido.productos) &&
+                              pedido.productos.map((prod, i) => (
+                                <li key={i} className="text-slate-700 text-sm">
+                                  🍽 {prod.nombre} x{prod.cantidad}
+                                </li>
+                              ))}
                           </ul>
                           {pedido.direccion?.calle && (
                             <p className="mt-2 text-slate-400 text-xs">

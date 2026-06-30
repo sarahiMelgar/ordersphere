@@ -100,7 +100,7 @@ function Pedidos() {
     switch (estado?.toLowerCase()) {
       case "pendiente":
         return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
-      case "en curso":
+      case "en_camino":
         return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
       case "entregado":
         return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
@@ -112,14 +112,32 @@ function Pedidos() {
   };
 
   // ==========================
+  // LABEL LEGIBLE DEL ESTADO
+  // ==========================
+  const getEstadoLabel = (estado) => {
+    switch (estado?.toLowerCase()) {
+      case "pendiente":
+        return "Pendiente";
+      case "en_camino":
+        return "En Camino";
+      case "entregado":
+        return "Entregado";
+      case "cancelado":
+        return "Cancelado";
+      default:
+        return estado || "Pendiente";
+    }
+  };
+
+  // ==========================
   // RENDER
   // ==========================
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6 md:p-8">
+      <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6 md:p-8">
         
         {/* HERO */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-orange-500 to-amber-600 rounded-3xl p-8 mb-8 text-white shadow-xl">
+        <div className="relative overflow-hidden bg-linear-to-r from-orange-500 to-amber-600 rounded-3xl p-8 mb-8 text-white shadow-xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/4"></div>
           <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-4">
@@ -166,9 +184,9 @@ function Pedidos() {
           <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-blue-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">En Curso</p>
+                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">En Camino</p>
                 <p className="text-3xl font-bold text-blue-500 mt-1">
-                  {pedidos.filter(p => p.estado?.toLowerCase() === "en curso").length}
+                  {pedidos.filter(p => p.estado?.toLowerCase() === "en_camino").length}
                 </p>
               </div>
               <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-xl">
@@ -274,8 +292,8 @@ function Pedidos() {
                       </td>
                       <td className="py-4 px-6">
                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${getEstadoColor(pedido.estado)}`}>
-                          <span className={`w-2 h-2 rounded-full ${pedido.estado?.toLowerCase() === 'entregado' ? 'bg-green-500' : pedido.estado?.toLowerCase() === 'pendiente' ? 'bg-yellow-500' : pedido.estado?.toLowerCase() === 'en curso' ? 'bg-blue-500' : 'bg-slate-500'}`}></span>
-                          {pedido.estado || 'Pendiente'}
+                          <span className={`w-2 h-2 rounded-full ${pedido.estado?.toLowerCase() === 'entregado' ? 'bg-green-500' : pedido.estado?.toLowerCase() === 'pendiente' ? 'bg-yellow-500' : pedido.estado?.toLowerCase() === 'en_camino' ? 'bg-blue-500' : 'bg-slate-500'}`}></span>
+                          {getEstadoLabel(pedido.estado)}
                         </span>
                       </td>
                       <td className="py-4 px-6 text-center">
@@ -292,28 +310,28 @@ function Pedidos() {
                           {pedido.estado?.toLowerCase() !== 'entregado' && pedido.estado?.toLowerCase() !== 'cancelado' && (
                             <>
                               <button
-                                onClick={() => cambiarEstado(pedido.id, 'Pendiente')}
+                                onClick={() => cambiarEstado(pedido.id, 'pendiente')}
                                 className="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-xl transition-all duration-200"
                                 title="Marcar como Pendiente"
                               >
                                 <FaClock size={16} />
                               </button>
                               <button
-                                onClick={() => cambiarEstado(pedido.id, 'En curso')}
+                                onClick={() => cambiarEstado(pedido.id, 'en_camino')}
                                 className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-xl transition-all duration-200"
-                                title="Marcar como En curso"
+                                title="Marcar como En Camino"
                               >
-                                <FaSpinner size={16} />
+                                <FaTruck size={16} />
                               </button>
                               <button
-                                onClick={() => cambiarEstado(pedido.id, 'Entregado')}
+                                onClick={() => cambiarEstado(pedido.id, 'entregado')}
                                 className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-xl transition-all duration-200"
                                 title="Marcar como Entregado"
                               >
                                 <FaCheck size={16} />
                               </button>
                               <button
-                                onClick={() => cambiarEstado(pedido.id, 'Cancelado')}
+                                onClick={() => cambiarEstado(pedido.id, 'cancelado')}
                                 className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-xl transition-all duration-200"
                                 title="Cancelar pedido"
                               >
@@ -373,7 +391,7 @@ function Pedidos() {
                 <div>
                   <p className="text-sm text-slate-500 dark:text-slate-400">Estado</p>
                   <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${getEstadoColor(pedidoSeleccionado.estado)}`}>
-                    {pedidoSeleccionado.estado || 'Pendiente'}
+                    {getEstadoLabel(pedidoSeleccionado.estado)}
                   </span>
                 </div>
                 <div>
